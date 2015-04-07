@@ -10,6 +10,8 @@
 #include "main.h"
 #include "thread.h"
 
+#define DEFAULT_STACK_SIZE = 16;
+
 /**
  * Returns a unique number.
  *
@@ -92,10 +94,26 @@ grn_thread *next_thread(grn_thread *thread) {
  * @return a pointer to the newly allocated grn_thread structure
  */
 grn_thread *grn_new_thread(bool alloc_stack) {
-  UNUSED(alloc_stack);
-
-  // FIXME: Allocate a new thread and stack.
-  return NULL;
+  grn_thread* new_thread = malloc(sizeof(grn_thread));
+  if (!new_thread) {
+    printf("Failed to Allocate Memory for New Thread\n");
+    return NULL;
+  }
+  memset(new_thread,0x00,sizeof(grn_thread));
+  new_thread->id = atomic_next_id();
+  new_thread->status = WAITING;
+  add_thread(new_thread);
+  if (alloc_stack){
+    new_thread->stack = malloc(STACK_SIZE);
+    if (!new_thread->stack){
+      printf("Unable to allocate memory for stack\n");
+      return NULL;
+    }
+    memset(new_thread->stack, 0x00, STACK_SIZE);
+  } else {
+    new_thread->stack = NULL;
+  }
+  return new_thread;
 }
 
 /**
@@ -105,9 +123,10 @@ grn_thread *grn_new_thread(bool alloc_stack) {
  * @param thread the thread to deallocate and remove from linked list
  */
 void grn_destroy_thread(grn_thread *thread) {
-  UNUSED(thread);
-
-  // FIXME: Free the resources used by `thread`.
+  assert(thread);
+  remove_thread(thread);
+  free(thread->stack);
+  free(thread);  
 }
 
 /**

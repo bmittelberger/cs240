@@ -49,8 +49,8 @@ $(TEST_BIN): $(TEST_OBJS) $(LIB)
 	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -L$(LIB_DIR) -lchloros -o $@ $^
 
-$(SUBMIT_TAR): $(LIB)
-	tar -zcf $@ $(LIB_DIR)
+$(SUBMIT_TAR):
+	tar -zcf $@ $(SRC_DIR)
 
 all: $(LIB)
 
